@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>院校专业信息查询系统地址发布页</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- 自定义Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#FF7D00',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .glass {
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .animate-pulse-slow {
+                animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+        }
+    </style>
+
+    <style>
+        /* 全局样式 */
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+
+        /* 渐变文字 */
+        .gradient-text {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 按钮悬停效果 */
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(22, 93, 255, 0.4);
+        }
+
+        /* 链接动画 */
+        .link-underline {
+            position: relative;
+        }
+
+        .link-underline::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #4facfe;
+            transition: width 0.3s ease;
+        }
+
+        .link-underline:hover::after {
+            width: 100%;
+        }
+
+        /* 背景动画 */
+        .bg-animate {
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-animate">
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="absolute top-0 left-0 w-full h-full bg-black/30"></div>
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/20 rounded-full filter blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/20 rounded-full filter blur-3xl"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="max-w-3xl w-full glass bg-white/10 rounded-2xl p-8 md:p-12 shadow-2xl border border-white/10">
+        <!-- 头部 -->
+        <header class="text-center mb-10">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-4 gradient-text">院校专业信息查询系统</h1>
+            <p class="text-lg md:text-xl text-gray-300 mb-2">地址发布页</p>
+            <p class="text-sm text-gray-400">请收藏本页到浏览器收藏夹</p>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="space-y-8">
+            <!-- 提示卡片 -->
+            <div class="bg-primary/10 border border-primary/30 rounded-xl p-5 shadow-lg">
+                <h3 class="text-xl font-semibold mb-3 flex items-center">
+                    <i class="fa fa-info-circle text-primary mr-2"></i>
+                    入口
+                </h3>
+                <p class="text-gray-300 text-sm mb-4">(不定期变动建议每次在这里点击进入)</p>
+
+                <!-- 链接列表 -->
+                <div class="space-y-3">
+                    <a class="block bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-4 flex items-center justify-between btn-hover" href="http://ip:5000/" target="_blank">
+                        <span class="flex items-center">
+                            <i class="fa fa-external-link text-primary mr-3"></i>
+                            <span>点此访问-117</span>
+                        </span>
+                        <i class="fa fa-arrow-right text-gray-400"></i>
+                    </a>
+
+                    <a class="block bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-4 flex items-center justify-between btn-hover" href="http://ip:5000/" target="_blank">
+                        <span class="flex items-center">
+                            <i class="fa fa-external-link text-primary mr-3"></i>
+                            <span>入口2 - 39</span>
+                        </span>
+                        <i class="fa fa-arrow-right text-gray-400"></i>
+                    </a>
+
+            <!-- 说明卡片 -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5 shadow-lg">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    <i class="fa fa-lightbulb-o text-secondary mr-2"></i>
+                    使用提示
+                </h3>
+                <ul class="space-y-2 text-gray-300 text-sm">
+                    <li class="flex items-start">
+                        <i class="fa fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>电脑请安装chrome浏览器访问</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>如依然无法访问请将dns设置为阿里云DNS(223.5.5.5)或其他DNS</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-exclamation-circle text-yellow-400 mt-1 mr-2"></i>
+                        <span class="font-medium">为防止失联请务必收藏好泡泡Dog地址发布页</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 收藏提示 -->
+            <div class="bg-secondary/10 border border-secondary/30 rounded-xl p-4 text-center animate-pulse-slow">
+                <p class="text-sm text-yellow-300 font-medium">
+                    <i class="fa fa-star mr-1"></i>
+                    按 Ctrl+D (Windows/Linux) 或 Command+D (Mac) 收藏本页
+                    <i class="fa fa-star ml-1"></i>
+                </p>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="mt-10 text-center text-gray-500 text-sm">
+            <p>© 域名 All Rights Reserved</p>
+            <div class="mt-3 flex justify-center space-x-4">
+
+            </div>
+        </footer>
+    </div>
+
+    <!-- 浮动图标 -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <a class="bg-primary hover:bg-primary/90 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110" href="#">
+            <i class="fa fa-bookmark-o"></i>
+        </a>
+    </div>
+
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加收藏提示
+            const addToFavorites = function() {
+                if (window.sidebar && window.sidebar.addPanel) { // Firefox
+                    window.sidebar.addPanel(document.title, window.location.href, '');
+                } else if (window.external && ('AddFavorite' in window.external)) { // IE
+                    window.external.AddFavorite(location.href, document.title);
+                } else { // Chrome, Safari
+                    alert('请按 Ctrl+D (Windows/Linux) 或 Command+D (Mac) 收藏本页');
+                }
+            };
+
+            // 绑定收藏按钮点击事件
+            document.querySelector('.fixed.bottom-6.right-6 a').addEventListener('click', function(e) {
+                e.preventDefault();
+                addToFavorites();
+            });
+
+            // 为所有链接添加点击日志
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    console.log(`用户点击了链接: ${this.href}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

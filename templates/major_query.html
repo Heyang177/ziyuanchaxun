@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>院校专业查询系统</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background-color: #f1f1f1; padding: 10px; margin-bottom: 20px; }
+        .search-form { background-color: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .search-form input, .search-form select { margin: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .search-form button { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .search-form button:hover { background-color: #45a049; }
+        .result-message { margin: 10px 0; padding: 10px; background-color: #e7f3ff; border-left: 6px solid #2196F3; }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; text-align: left; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .logout { float: right; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>全新院校专业查询系统</h2>
+            <span>欢迎, {{ user_info }}</span>
+            <a class="logout" href="/">退出登录</a>
+        </div>
+        
+        <div class="search-form">
+            <h3>查询条件</h3>
+            <form method="post">
+                <div>
+                    <label>批次名称:</label>
+                    <input name="batch_name" placeholder="请输入批次名称，如: 本科批" type="text">
+                    
+                    <label>院校专业组代码:</label>
+                    <input name="school_code" placeholder="请输入院校专业组代码，如: 001" type="text">
+                    
+                    <label>院校专业组名称:</label>
+                    <input name="school_group_name" placeholder="如: 计算机类" type="text">
+                </div>
+                <div>
+                    <label>专业代号:</label>
+                    <input name="major_code" placeholder="如: 080901" type="text">
+                    
+                    <label>专业名称:</label>
+                    <input name="major_name" placeholder="如: 计算机科学与技术" type="text">
+                </div>
+                <div>
+                    <label>选科要求:</label>
+                    <input name="subject_requirement" placeholder="如: 物理必选" type="text">
+                    
+                    <label>考生资格要求:</label>
+                    <input name="qualification" placeholder="如: 无特殊要求" type="text">
+                </div>
+                <button type="submit">查询</button>
+            </form>
+        </div>
+        
+        {% if query_message %}
+        <div class="result-message">{{ query_message }}</div>
+        {% endif %}
+        
+        {% if query_result %}
+        <table>
+            <tr>
+                <th>批次名称</th>
+                <th>院校专业组代码</th>
+                <th>院校专业组名称</th>
+                <th>专业代号</th>
+                <th>专业名称</th>
+                <th>选科要求</th>
+                <th>考生资格要求</th>
+            </tr>
+            {% for row in query_result %}
+            <tr>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+                <td>{{ row[7] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>
