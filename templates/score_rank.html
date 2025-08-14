@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}成绩排名查询{% endblock %}
+
+{% block content %}
+    <h1>成绩排名查询</h1>
+    <form method="post">
+        <label for="name">输入姓名:</label>
+        <input id="name" name="name" required type="text">
+        <button type="submit">查询</button>
+    </form>
+    {% if msg %}
+        <p>{{ msg }}</p>
+    {% endif %}
+    {% if name %}
+        <table style="width: auto;" style="writing-mode: vertical-rl; text-orientation: upright;" style="border-collapse: collapse;">
+            <th eadstyle="white-space: nowrap;">
+                <tr>
+                      <th style="background-color: blue; color: white;">姓名</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ name }}</td>
+                  </tr>
+                  <tr>
+                      <th style="background-color: blue; color: white;">应知成绩</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ theory_score }}</td>
+                  </tr>
+                  <tr>
+                      <th style="background-color: blue; color: white;">应会成绩</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ practical_score }}</td>
+                  </tr>
+                  <tr>
+                      <th style="background-color: blue; color: white;">文化成绩</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ cultural_score }}</td>
+                  </tr>
+                  <tr>
+                      <th style="background-color: blue; color: white;">总分</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ total_score }}</td>
+                  </tr>
+                  <tr>
+                      <th style="background-color: blue; color: white;">排名</th>
+                      <td style="text-align: center; border: 1px solid black;">{{ rank }}</td>
+                  </tr>
+              </tbody>
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

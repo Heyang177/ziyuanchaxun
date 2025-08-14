@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">管理员控制面板</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="mb-4">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button aria-label="Close" class="btn-close" data-bs-dismiss="alert" type="button"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <!-- 管理员功能选项卡 -->
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="users-tab-pane" aria-selected="true" class="nav-link active" data-bs-target="#users-tab-pane" data-bs-toggle="tab" id="users-tab" role="tab" type="button">
+                        <i class="fas fa-users"></i> 用户列表
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="add-user-tab-pane" aria-selected="false" class="nav-link" data-bs-target="#add-user-tab-pane" data-bs-toggle="tab" id="add-user-tab" role="tab" type="button">
+                        <i class="fas fa-user-plus"></i> 添加用户
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body">
+            <div class="tab-content" id="adminTabsContent">
+                <!-- 用户列表选项卡 -->
+                <div aria-labelledby="users-tab" class="tab-pane fade show active" id="users-tab-pane" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <th>用户名</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.admin_name }}</td>
+                                    
+                                    <td>
+                                        <button class="btn btn-sm btn-primary me-2" onclick="editUser({{ user.id }}, '{{ user.admin_name }}')"
+                                                type="button">
+                                            <i class="fas fa-edit"></i> 修改
+                                        </button>
+                                        <button class="btn btn-sm btn-warning me-2" onclick="changePassword({{ user.id }}, '{{ user.admin_name }}')"
+                                                type="button">
+                                            <i class="fas fa-key"></i> 改密码
+                                        </button>
+                                        <form action="{{ url_for('delete_user', user_id=user.id) }}" class="d-inline" method="post">
+                                            <button class="btn btn-sm btn-danger" onclick="return confirm('确定要删除用户吗？')" type="submit">
+                                                <i class="fas fa-trash"></i> 删除
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td class="text-center" colspan="4">没有用户记录</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 添加用户选项卡 -->
+                <div aria-labelledby="add-user-tab" class="tab-pane fade" id="add-user-tab-pane" role="tabpanel">
+                    <form action="{{ url_for('add_user') }}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="admin_name">用户名 <span class="text-danger">*</span></label>
+                            <input class="form-control" id="admin_name" name="admin_name" required type="text">
+                            <div class="form-text">3-20位字母、数字或下划线</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="admin_password">密码 <span class="text-danger">*</span></label>
+                            <input class="form-control" id="admin_password" name="admin_password" required type="password">
+                            <div class="form-text">6-20位字母、数字或特殊字符</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="confirm_password">确认密码 <span class="text-danger">*</span></label>
+                            <input class="form-control" id="confirm_password" name="confirm_password" required type="password">
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-save"></i> 保存
+                            </button>
+                            <button class="btn btn-secondary ms-2" onclick="resetAddUserForm()" type="button">
+                                <i class="fas fa-times"></i> 取消
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改用户模态框 -->
+<div aria-hidden="true" aria-labelledby="editUserModalLabel" class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">修改用户</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <form id="editUserForm" method="post">
+                <div class="modal-body">
+                    <input id="edit_user_id" name="user_id" type="hidden">
+                    <div class="mb-3">
+                        <label class="form-label" for="edit_admin_name">用户名 <span class="text-danger">*</span></label>
+                        <input class="form-control" id="edit_admin_name" name="admin_name" required type="text">
+                        <div class="form-text">3-20位字母、数字或下划线</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-save"></i> 保存修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 修改密码模态框 -->
+<div aria-hidden="true" aria-labelledby="changePasswordModalLabel" class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">修改密码</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <form id="changePasswordForm" method="post">
+                <div class="modal-body">
+                    <input id="change_password_user_id" name="user_id" type="hidden">
+                    <div class="mb-3">
+                        <label class="form-label" for="new_password">新密码 <span class="text-danger">*</span></label>
+                        <input class="form-control" id="new_password" name="new_password" required type="password">
+                        <div class="form-text">6-20位字母、数字或特殊字符</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="confirm_new_password">确认新密码 <span class="text-danger">*</span></label>
+                        <input class="form-control" id="confirm_new_password" name="confirm_password" required type="password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-save"></i> 保存修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// 初始化编辑用户模态框
+function editUser(userId, username) {
+    document.getElementById('edit_user_id').value = userId;
+    document.getElementById('edit_admin_name').value = username;
+    document.getElementById('editUserForm').action = `/edit_user/${userId}`;
+    new bootstrap.Modal(document.getElementById('editUserModal')).show();
+}
+
+// 初始化修改密码模态框
+function changePassword(userId, username) {
+    document.getElementById('change_password_user_id').value = userId;
+    document.getElementById('changePasswordForm').action = `/change_password/${userId}`;
+    document.getElementById('changePasswordModalLabel').textContent = `修改密码 - ${username}`;
+    new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+}
+
+// 重置添加用户表单
+function resetAddUserForm() {
+    document.getElementById('admin_name').value = '';
+    document.getElementById('admin_password').value = '';
+    document.getElementById('confirm_password').value = '';
+}
+
+// 添加表单验证
+document.addEventListener('DOMContentLoaded', function() {
+    // 添加用户表单验证
+    const addUserForm = document.getElementById('addUserForm');
+    if (addUserForm) {
+        addUserForm.addEventListener('submit', function(event) {
+            if (!addUserForm.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            addUserForm.classList.add('was-validated');
+        });
+    }
+    
+    // 修改用户表单验证
+    const editUserForm = document.getElementById('editUserForm');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', function(event) {
+            if (!editUserForm.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            editUserForm.classList.add('was-validated');
+        });
+    }
+    
+    // 修改密码表单验证
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function(event) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_new_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                event.preventDefault();
+                event.stopPropagation();
+                document.getElementById('confirm_new_password').setCustomValidity('两次输入的密码不一致');
+            } else {
+                document.getElementById('confirm_new_password').setCustomValidity('');
+            }
+            
+            if (!changePasswordForm.checkValidity()) {
+                changePasswordForm.classList.add('was-validated');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>专业查询 - 院校专业信息查询系统</title>
+    <link href="favicon.ico" rel="icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .main-container {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        .search-form {
+            margin-bottom: 30px;
+        }
+        .result-table {
+            margin-top: 30px;
+        }
+        .footer {
+            background-color: #343a40;
+            color: #fff;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+        .footer a {
+            color: #adb5bd;
+        }
+        .footer a:hover {
+            color: #fff;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .page-item.active .page-link {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .export-progress {
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                院校专业信息查询系统
+            </a>
+            <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/college_major">专业查询</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/skill_college_1">本科综合一分一段</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/skill_college_2">本科投档录取情况</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/skill_college_3">高职高专投格录取情况</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/skill_college_4">高职高专一分一段</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text me-2">
+                        <i class="fas fa-user-circle me-1"></i> {{ user_info }}
+                    </span>
+                    <a class="btn btn-outline-light" href="/">退出登录</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="container main-container">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- 页面标题 -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>
+                        <i class="fas fa-search me-2 text-primary"></i>
+                        专业信息查询
+                    </h1>
+                    <div class="btn-group" role="group">
+                        {% if session.get('is_admin', False) %}
+<button class="btn btn-sm btn-outline-primary" id="exportBtn" type="button">
+                            <i class="fas fa-download me-1"></i> 导出数据
+                        </button>
+{% endif %}
+                        <div class="export-progress" id="exportProgress">
+                            <div class="progress" style="height: 5px;">
+                                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">正在准备数据，请稍候...</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-target="#helpModal" data-bs-toggle="modal" type="button">
+                            <i class="fas fa-question-circle me-1"></i> 使用帮助
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 操作结果提示 -->
+                {% if query_result %}
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span>{{ query_result }}</span>
+                </div>
+                {% endif %}
+
+                <!-- 查询表单 -->
+                <div class="card search-form">
+                    <div class="card-body">
+                        <form action="/college_major" class="row g-3" method="post">
+                            <div class="col-md-12">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="batch_name_query">批次名称</label>
+                                        <input class="form-control" id="batch_name_query" name="batch_name_query"
+                                            type="text" value="{{ batch_name_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="college_code_query">院校专业组代码</label>
+                                        <input class="form-control" id="college_code_query" name="college_code_query"
+                                            type="text" value="{{ college_code_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="college_name_query">院校专业组名称</label>
+                                        <input class="form-control" id="college_name_query" name="college_name_query"
+                                            type="text" value="{{ college_name_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="major_code_query">专业代号</label>
+                                        <input class="form-control" id="major_code_query" name="major_code_query"
+                                            type="text" value="{{ major_code_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="major_name_query">专业名称</label>
+                                        <input class="form-control" id="major_name_query" name="major_name_query"
+                                            type="text" value="{{ major_name_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="subject_requirement_query">选科要求</label>
+                                        <input class="form-control" id="subject_requirement_query" name="subject_requirement_query"
+                                            type="text" value="{{ subject_requirement_query }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="qualification_requirement_query">考生资格要求</label>
+                                        <input class="form-control" id="qualification_requirement_query" name="qualification_requirement_query"
+                                            type="text" value="{{ qualification_requirement_query }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" type="submit">
+                                    <i class="fas fa-search me-1"></i> 开始查询
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 结果表格 -->
+                <div class="result-table">
+                    <h3 class="mb-4">
+                        <i class="fas fa-table me-2 text-primary"></i>
+                        查询结果列表
+                    </h3>
+
+                    {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr class="table-primary">
+                                    <th>批次名称</th>
+                                    <th>院校专业组代码</th>
+                                    <th>院校专业组名称</th>
+                                    <th>专业代号</th>
+                                    <th>专业名称</th>
+                                    <th>选科要求</th>
+                                    <th>考生资格要求</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in results %}
+                                <tr>
+                                    <td>{{ row.batch_name }}</td>
+                                    <td>{{ row.college_code }}</td>
+                                    <td>{{ row.college_name }}</td>
+                                    <td>{{ row.major_code }}</td>
+                                    <td>{{ row.major_name }}</td>
+                                    <td>{{ row.subject_requirement if row.subject_requirement else '无特殊要求' }}</td>
+                                    <td>{{ row.qualification_requirement if row.qualification_requirement else '无特殊要求' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页控件 -->
+                    <nav aria-label="Page navigation">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>当前页码: {{ current_page }} / {{ total_pages }}</span>
+                            <div class="d-flex">
+                                <form action="/college_major" class="d-inline me-2" method="get">
+                                    <!-- 隐藏字段保留查询条件 -->
+                                    <input name="batch_name_query" type="hidden" value="{{ batch_name_query }}">
+                                    <input name="college_code_query" type="hidden" value="{{ college_code_query }}">
+                                    <input name="college_name_query" type="hidden" value="{{ college_name_query }}">
+                                    <input name="major_code_query" type="hidden" value="{{ major_code_query }}">
+                                    <input name="major_name_query" type="hidden" value="{{ major_name_query }}">
+                                    <input name="subject_requirement_query" type="hidden" value="{{ subject_requirement_query }}">
+                                    <input name="qualification_requirement_query" type="hidden" value="{{ qualification_requirement_query }}">
+
+                                    <div class="input-group input-group-sm">
+                                        <input class="form-control" max="{{ total_pages }}" min="1"
+                                            name="page" placeholder="输入页码"
+                                            type="number" value="{{ current_page }}">
+                                        <button class="btn btn-primary" type="submit">跳转</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <ul class="pagination justify-content-center">
+                            <!-- 首页和上一页 -->
+                            {% if current_page > 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('college_major', page=1, **pagination_args) }}">首页</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('college_major', page=current_page-1, **pagination_args) }}">上一页</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">首页</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">上一页</a>
+                            </li>
+                            {% endif %}
+
+                            <!-- 页码列表 -->
+                            {% set start_page = max(1, current_page - 2) %}
+                            {% set end_page = min(total_pages, start_page + 4) %}
+
+                            {% if start_page > 1 %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('college_major', page=1, **pagination_args) }}">1</a></li>
+                            {% if start_page > 2 %}
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                            {% endif %}
+                            {% endif %}
+
+                            {% for page_num in range(start_page, end_page + 1) %}
+                            {% if page_num == current_page %}
+                            <li class="page-item active"><a class="page-link" href="{{ url_for('college_major', page=page_num, **pagination_args) }}">{{ page_num }}</a></li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('college_major', page=page_num, **pagination_args) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if end_page < total_pages %}
+                            {% if end_page < total_pages - 1 %}
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                            {% endif %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('college_major', page=total_pages, **pagination_args) }}">{{ total_pages }}</a></li>
+                            {% endif %}
+
+                            <!-- 下一页和尾页 -->
+                            {% if current_page < total_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('college_major', page=current_page+1, **pagination_args) }}">下一页</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('college_major', page=total_pages, **pagination_args) }}">尾页</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">下一页</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">尾页</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+
+                    {% else %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span>未找到符合条件的记录</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 使用帮助模态框 -->
+    <div aria-hidden="true" aria-labelledby="helpModalLabel" class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="fas fa-question-circle me-2 text-primary"></i>
+                        院校专业信息查询系统使用帮助
+                    </h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="helpAccordion">
+                        <!-- 系统概述 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading1">
+                                <button aria-controls="collapse1" aria-expanded="true" class="accordion-button" data-bs-target="#collapse1" data-bs-toggle="collapse" type="button">
+                                    系统概述
+                                </button>
+                            </h2>
+                            <div aria-labelledby="heading1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion" id="collapse1">
+                                <div class="accordion-body">
+                                    <p>院校专业信息查询系统提供全面的高校专业信息查询服务，帮助考生和家长了解各高校专业设置、选科要求等信息，辅助决策。</p>
+                                    <p>系统主要功能包括：</p>
+                                    <ul>
+                                        <li>院校专业信息查询</li>
+                                        <li>多条件组合筛选</li>
+                                        <li>查询结果分页浏览</li>
+                                        <li>数据导出</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 如何查询 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading2">
+                                <button aria-controls="collapse2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#collapse2" data-bs-toggle="collapse" type="button">
+                                    如何查询院校专业信息
+                                </button>
+                            </h2>
+                            <div aria-labelledby="heading2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion" id="collapse2">
+                                <div class="accordion-body">
+                                    <p>您可以通过以下步骤查询院校专业信息：</p>
+                                    <ol>
+                                        <li>在查询表单中输入您想要查询的条件，可以是批次名称、院校专业组代码、院校专业组名称、专业代号、专业名称、选科要求或考生资格要求中的任意一项或多项。</li>
+                                        <li>点击"开始查询"按钮提交查询请求。</li>
+                                        <li>系统将显示符合条件的院校专业信息列表。</li>
+                                        <li>如果查询结果较多，系统会自动分页显示，您可以通过分页控件切换页面。</li>
+                                    </ol>
+                                    <p><strong>示例：</strong> 如果您想查询"计算机科学与技术"专业的相关信息，可以在"专业名称"输入框中输入"计算机科学与技术"，然后点击查询按钮。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 如何导出数据 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading3">
+                                <button aria-controls="collapse3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#collapse3" data-bs-toggle="collapse" type="button">
+                                    如何导出查询结果
+                                </button>
+                            </h2>
+                            <div aria-labelledby="heading3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion" id="collapse3">
+                                <div class="accordion-body">
+                                    <p>当您查询到需要的院校专业信息后，可以将结果导出为CSV文件，方便进一步分析和处理。操作步骤如下：</p>
+                                    <ol>
+                                        <li>首先进行查询，获取您需要的结果列表。</li>
+                                        <li>点击页面右上角的"导出数据"按钮。</li>
+                                        <li>系统会自动生成并下载一个CSV文件，文件名为"院校专业数据_日期.csv"。</li>
+                                        <li>您可以使用Excel或其他电子表格软件打开这个CSV文件进行查看和编辑。</li>
+                                    </ol>
+                                    <p><strong>注意事项：</strong> 导出的数据将包含当前查询条件下的所有记录，而不仅仅是当前页显示的记录。如果查询结果较多，导出过程可能需要一些时间，请耐心等待。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 分页导航 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading4">
+                                <button aria-controls="collapse4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#collapse4" data-bs-toggle="collapse" type="button">
+                                    如何使用分页导航
+                                </button>
+                            </h2>
+                            <div aria-labelledby="heading4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion" id="collapse4">
+                                <div class="accordion-body">
+                                    <p>当查询结果较多时，系统会自动分页显示。您可以通过以下方式进行分页导航：</p>
+                                    <ul>
+                                        <li>使用"上一页"和"下一页"按钮在相邻页面间切换。</li>
+                                        <li>点击具体的页码直接跳转到对应页面。</li>
+                                        <li>使用"首页"和"尾页"按钮快速定位到第一页或最后一页。</li>
+                                        <li>在"输入页码"输入框中输入页码，然后点击"跳转"按钮直接跳转到指定页面。</li>
+                                    </ul>
+                                    <p>无论您使用哪种方式切换页面，系统都会保留您的查询条件，确保您在浏览不同页面时看到的是同一查询条件下的结果。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 常见问题 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading5">
+                                <button aria-controls="collapse5" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#collapse5" data-bs-toggle="collapse" type="button">
+                                    常见问题
+                                </button>
+                            </h2>
+                            <div aria-labelledby="heading5" class="accordion-collapse collapse" data-bs-parent="#helpAccordion" id="collapse5">
+                                <div class="accordion-body">
+                                    <p><strong>Q1：为什么我查询不到任何结果？</strong></p>
+                                    <p><strong>A1：</strong> 可能有以下原因：</p>
+                                    <ul>
+                                        <li>您输入的查询条件过于严格，没有匹配的记录。建议放宽条件重试。</li>
+                                        <li>数据库中确实没有符合您条件的记录。</li>
+                                        <li>检查您的输入是否存在拼写错误。</li>
+                                    </ul>
+
+                                    <p><strong>Q2：导出的数据文件为什么无法打开？</strong></p>
+                                    <p><strong>A2：</strong> 请确保您使用的是兼容CSV格式的软件打开文件，如Microsoft Excel、WPS表格等。如果文件损坏，可以尝试重新导出。</p>
+
+                                    <p><strong>Q3：如何获取更多帮助？</strong></p>
+                                    <p><strong>A3：</strong> 您可以点击页面右上角的"使用帮助"按钮查看本指南，或联系客服获取进一步支持。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>其它</h4>
+                    <li><a href="/score_rank">班级成绩</a></li>
+                </div>
+                <div class="col-md-4">
+                    <h4>快速链接</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="/">首页</a></li>
+                        <li><a href="/college_major">专业查询</a></li>
+                        <li><a href="/hbksw_embed">湖北省2025年普通高校招生计划查询与志愿填报辅助系统</a></li>
+                        <li><a href="http://www.hbea.edu.cn">湖北省教育考试院</a></li>
+                        <li><a href="http://jyt.hubei.gov.cn">湖北省教育厅</a></li>
+                        <li><a href="http://zwfw.hubei.gov.cn">湖北政务服务网</a></li>
+                        <li><a href="http://www.hbksw.com">湖北招生考试网</a></li>
+                        <li><a href="http://www.hbccks.cn">湖北教育考试网</a></li>
+                        <li><a href="https://gaokao.chsi.com.cn/">阳光高考</a></li>
+                        <li><a href="/chaxun">2025年湖北省普通高等学校招生考试成绩查询</a></li>
+
+                        
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h4>联系我们</h4>
+                    <p><i class="fas fa-envelope me-2"></i> test@qq.com</p>
+                    <p><i class="fas fa-phone me-2"></i> QQ:123456</p>
+                    <p><i class="fas fa-clock me-2"></i> 周一至周日 9:00-18:00</p>
+                </div>
+            </div>
+            <div class="row mt-4 pt-4 border-top">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2025 院校专业信息查询系统 版权所有</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 导出数据功能
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            // 显示进度条
+            const exportProgress = document.getElementById('exportProgress');
+            exportProgress.style.display = 'block';
+
+            // 获取当前查询条件
+            const queryParams = {
+                batch_name_query: '{{ batch_name_query }}',
+                college_code_query: '{{ college_code_query }}',
+                college_name_query: '{{ college_name_query }}',
+                major_code_query: '{{ major_code_query }}',
+                major_name_query: '{{ major_name_query }}',
+                subject_requirement_query: '{{ subject_requirement_query }}',
+                qualification_requirement_query: '{{ qualification_requirement_query }}'
+            };
+
+            // 构建查询字符串
+            const queryString = Object.entries(queryParams)
+                .filter(([key, value]) => value !== '')
+                .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                .join('&');
+
+            // 调用导出接口
+            const exportUrl = `/export_college_major?${queryString}`;
+
+            // 使用fetch API获取数据并触发下载
+            fetch(exportUrl)
+                .then(response => {
+                    // 隐藏进度条
+                    exportProgress.style.display = 'none';
+
+                    if (!response.ok) {
+                        throw new Error('导出失败: ' + response.statusText);
+                    }
+
+                    // 检查响应类型是否为CSV
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('text/csv')) {
+                        return response.blob().then(blob => {
+                            // 创建下载链接
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+
+                            // 从响应头中获取文件名
+                            const contentDisposition = response.headers.get('content-disposition');
+                            if (contentDisposition) {
+                                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                                if (filenameMatch && filenameMatch[1]) {
+                                    a.download = filenameMatch[1];
+                                }
+                            }
+
+                            // 触发下载
+                            document.body.appendChild(a);
+                            a.click();
+
+                            // 清理
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(url);
+                            }, 100);
+                        });
+                    } else {
+                        // 如果不是CSV，可能是错误信息
+                        return response.text().then(text => {
+                            throw new Error('导出失败: ' + text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    // 隐藏进度条
+                    exportProgress.style.display = 'none';
+
+                    // 显示错误信息
+                    alert('导出失败: ' + error.message);
+                    console.error('导出失败:', error);
+                });
+        });
+
+        // 模态框显示事件
+        const helpModal = document.getElementById('helpModal');
+        if (helpModal) {
+            helpModal.addEventListener('shown.bs.modal', function () {
+                // 模态框显示后，默认展开第一个帮助项
+                const firstCollapse = document.getElementById('collapse1');
+                if (firstCollapse) {
+                    firstCollapse.classList.add('show');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
